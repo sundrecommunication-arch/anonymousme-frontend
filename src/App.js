@@ -1,4 +1,4 @@
-import ResponderDashboard from './ResponderDashboard';
+import ResponderDashboard from './responderdashboard';
 import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
@@ -128,7 +128,7 @@ function App() {
           <p style={{ color: '#6B7280' }}>This section is for verified responders — police, hospitals, fire service, and community agents across all 36 states and FCT.</p>
           <p style={{ color: '#6B7280', fontSize: '13px' }}>Responders receive real-time push notifications and SMS alerts when a citizen sends an alert in their zone.</p>
         </div>
-      )}
+  
 
       <div style={{ marginTop: '30px', padding: '10px', backgroundColor: '#F3F4F6', borderRadius: '8px', textAlign: 'center' }}>
         <p style={{ margin: 0, fontSize: '11px', color: '#9CA3AF' }}>🔒 AnonymousMe — Built for Nigeria. No data stored. No identity tracked.</p>
