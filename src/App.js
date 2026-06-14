@@ -1,3 +1,4 @@
+import ResponderDashboard from './ResponderDashboard';
 import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
@@ -119,6 +120,8 @@ function App() {
       )}
 
       {view === 'responder' && (
+        <ResponderDashboard />
+      )}
         <div style={{ textAlign: 'center', padding: '40px 20px', backgroundColor: '#F9FAFB', borderRadius: '10px' }}>
           <div style={{ fontSize: '50px', marginBottom: '15px' }}>🚔</div>
           <h2 style={{ color: '#1F2937' }}>Responder Dashboard</h2>
