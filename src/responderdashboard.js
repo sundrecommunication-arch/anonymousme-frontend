@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const API_URL = 'https://anonymousme-production.up.railway.app';
@@ -29,15 +29,7 @@ function ResponderDashboard() {
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  useEffect(() => {
-    if (isLoggedIn && responderState) {
-      fetchAlerts();
-      const interval = setInterval(fetchAlerts, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [isLoggedIn, responderState, fetchAlerts]);
-
-  const fetchAlerts = async () => {
+  const fetchAlerts = useCallback(async () => {
     try {
       const response = await axios.get(`${API_URL}/api/alerts/${responderState}`);
       setAlerts(response.data);
@@ -45,7 +37,15 @@ function ResponderDashboard() {
     } catch (error) {
       console.error('Error fetching alerts:', error);
     }
-  };
+  }, [responderState]);
+
+  useEffect(() => {
+    if (isLoggedIn && responderState) {
+      fetchAlerts();
+      const interval = setInterval(fetchAlerts, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isLoggedIn, responderState, fetchAlerts]);
 
   const handleLogin = async () => {
     if (!responderType || !responderName || !responderState || !responderPhone) {
