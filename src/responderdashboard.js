@@ -35,7 +35,7 @@ function ResponderDashboard() {
       const interval = setInterval(fetchAlerts, 30000);
       return () => clearInterval(interval);
     }
-  }, [isLoggedIn, responderState]);
+  }, [isLoggedIn, responderState, fetchAlerts]);
 
   const fetchAlerts = async () => {
     try {
