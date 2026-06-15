@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { requestNotificationPermission } from './firebase';
 
 const API_URL = 'https://anonymousme-production.up.railway.app';
 
@@ -54,11 +55,13 @@ function ResponderDashboard() {
     }
     setLoading(true);
     try {
+      const fcmToken = await requestNotificationPermission();
       await axios.post(`${API_URL}/api/responder/register`, {
         name: responderName,
         type: responderType,
         zone: responderState,
         phone: responderPhone,
+        fcmToken: fcmToken,
       });
       setIsLoggedIn(true);
     } catch (error) {
