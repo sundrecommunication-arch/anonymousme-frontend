@@ -33,7 +33,6 @@ function App() {
   const [confirmed, setConfirmed] = useState(false);
   const [view, setView] = useState('citizen');
   const [recentAlerts, setRecentAlerts] = useState([]);
-  const [loadingAlerts, setLoadingAlerts] = useState(false);
 
   const handleSubmit = async () => {
     if (!selectedType || !selectedState) {
@@ -71,14 +70,14 @@ function App() {
   };
 
   const loadRecentAlerts = async (state) => {
-    setLoadingAlerts(true);
+    
     try {
       const response = await axios.get(`${API_URL}/api/alerts/${state}`);
       setRecentAlerts(response.data);
     } catch (error) {
       console.error('Error loading alerts:', error);
     }
-    setLoadingAlerts(false);
+
   };
 
   const resetForm = () => {
