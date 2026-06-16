@@ -48,6 +48,18 @@ function App() {
       alert('Please select an alert type and your state');
       return;
     }
+
+    const now = Date.now();
+    const alertTimes = JSON.parse(localStorage.getItem('alert_times') || '[]');
+    const recentAlertTimes = alertTimes.filter(time => now - time < 3600000);
+
+    if (recentAlertTimes.length >= 3) {
+      alert('You have sent too many alerts in the last hour. Please wait before sending another.');
+      return;
+    }
+
+    recentAlertTimes.push(now);
+    localStorage.setItem('alert_times', JSON.stringify(recentAlertTimes));
     setLoading(true);
     try {
       const response = await axios.post(`${API_URL}/api/alert`, {
