@@ -43,6 +43,7 @@ function App() {
   const [confirmed, setConfirmed] = useState(false);
   const [view, setView] = useState('citizen');
   const [recentAlerts, setRecentAlerts] = useState([]);
+  const [evidenceFile, setEvidenceFile] = useState(null);
 
   const handleSubmit = async () => {
     if (!selectedType || !selectedState) {
@@ -63,12 +64,31 @@ function App() {
     localStorage.setItem('alert_times', JSON.stringify(recentAlertTimes));
     setLoading(true);
     try {
+      let evidenceUrl = null;
+
+      if (evidenceFile) {
+        const fileExt = evidenceFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(
+          'https://aalmhlcoakletcfdsjnz.supabase.co',
+          'sb_publishable_Gq0a3bw1l_XDzq853I8WMg_o1wAPpUY'
+        );
+        const { data: uploadData } = await supabase.storage
+          .from('evidence')
+          .upload(fileName, evidenceFile);
+        if (uploadData) {
+          evidenceUrl = `https://aalmhlcoakletcfdsjnz.supabase.co/storage/v1/object/public/evidence/${fileName}`;
+        }
+      }
+
       const response = await axios.post(`${API_URL}/api/alert`, {
         type: selectedType,
         message: message,
         zone: zone || selectedState,
         state: selectedState,
         deviceId: getDeviceId(),
+        evidenceUrl: evidenceUrl,
       });
       setAlertId(response.data.alertId);
       const sentAlerts = JSON.parse(localStorage.getItem('sent_alerts') || '[]');
@@ -203,8 +223,20 @@ function App() {
                 ))}
               </select>
 
-              <h3 style={{ color: '#1F2937', marginBottom: '10px' }}>Your Area / Zone (optional):</h3>
-              <input value={zone} onChange={e => setZone(e.target.value)} placeholder='e.g. Oshodi, Ikeja, Wuse...' style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', marginBottom: '15px', fontSize: '14px', boxSizing: 'border-box' }} />
+              <h3 style={{ color: '#1F2937', marginBottom: '10px' }}>Describe the situation (optional):</h3>
+              <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder='Briefly describe what is happening...' style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', marginBottom: '15px', fontSize: '14px', height: '100px', boxSizing: 'border-box' }} />
+
+              <h3 style={{ color: '#1F2937', marginBottom: '10px' }}>Upload Evidence (optional):</h3>
+              <div style={{ border: '2px dashed #E5E7EB', borderRadius: '8px', padding: '15px', marginBottom: '20px', textAlign: 'center' }}>
+                <input type='file' accept='image/*,video/*' onChange={e => setEvidenceFile(e.target.files[0])} style={{ display: 'none' }} id='evidence-upload' />
+                <label htmlFor='evidence-upload' style={{ cursor: 'pointer' }}>
+                  <div style={{ fontSize: '24px', marginBottom: '5px' }}>📎</div>
+                  <div style={{ fontSize: '13px', color: '#6B7280' }}>
+                    {evidenceFile ? evidenceFile.name : 'Click to upload photo or video evidence'}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '3px' }}>Supports images and videos. Max 50MB.</div>
+                </label>
+              </div>
 
               <h3 style={{ color: '#1F2937', marginBottom: '10px' }}>Describe the situation (optional):</h3>
               <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder='Briefly describe what is happening...' style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', marginBottom: '20px', fontSize: '14px', height: '100px', boxSizing: 'border-box' }} />
