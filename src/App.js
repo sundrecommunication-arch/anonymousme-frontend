@@ -1,7 +1,7 @@
-import ResponderDashboard from './responderdashboard';
 import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
+import ResponderDashboard from './responderdashboard';
 
 const STATES = [
   'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
@@ -19,6 +19,8 @@ const ALERT_TYPES = [
   { id: 'community', label: 'Community Help', icon: '🤝', description: 'Request community assistance' },
 ];
 
+const API_URL = 'https://anonymousme-production.up.railway.app';
+
 function App() {
   const [selectedType, setSelectedType] = useState(null);
   const [message, setMessage] = useState('');
@@ -26,7 +28,12 @@ function App() {
   const [zone, setZone] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [alertId, setAlertId] = useState(null);
+  const [confirmations, setConfirmations] = useState(0);
+  const [confirmed, setConfirmed] = useState(false);
   const [view, setView] = useState('citizen');
+  const [recentAlerts, setRecentAlerts] = useState([]);
+  const [loadingAlerts, setLoadingAlerts] = useState(false);
 
   const handleSubmit = async () => {
     if (!selectedType || !selectedState) {
@@ -35,18 +42,43 @@ function App() {
     }
     setLoading(true);
     try {
-      await axios.post('https://anonymousme-production.up.railway.app/api/alert', {
+      const response = await axios.post(`${API_URL}/api/alert`, {
         type: selectedType,
         message: message,
         zone: zone || selectedState,
         state: selectedState,
       });
+      setAlertId(response.data.alertId);
       setSubmitted(true);
+      loadRecentAlerts(selectedState);
     } catch (error) {
-      alert('Alert sent successfully');
       setSubmitted(true);
     }
     setLoading(false);
+  };
+
+  const handleConfirm = async (id) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/alert/confirm`, {
+        alertId: id
+      });
+      setConfirmations(response.data.confirmations);
+      setConfirmed(response.data.confirmed);
+      loadRecentAlerts(selectedState);
+    } catch (error) {
+      console.error('Error confirming alert:', error);
+    }
+  };
+
+  const loadRecentAlerts = async (state) => {
+    setLoadingAlerts(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/alerts/${state}`);
+      setRecentAlerts(response.data);
+    } catch (error) {
+      console.error('Error loading alerts:', error);
+    }
+    setLoadingAlerts(false);
   };
 
   const resetForm = () => {
@@ -55,6 +87,32 @@ function App() {
     setSelectedState('');
     setZone('');
     setSubmitted(false);
+    setAlertId(null);
+    setConfirmations(0);
+    setConfirmed(false);
+    setRecentAlerts([]);
+  };
+
+  const getAlertColor = (type) => {
+    const colors = {
+      election: '#FEF3C7',
+      security: '#FEE2E2',
+      medical: '#DBEAFE',
+      fire: '#FFEDD5',
+      community: '#D1FAE5',
+    };
+    return colors[type] || '#F3F4F6';
+  };
+
+  const getAlertIcon = (type) => {
+    const icons = {
+      election: '🗳️',
+      security: '🚨',
+      medical: '🏥',
+      fire: '🔥',
+      community: '🤝',
+    };
+    return icons[type] || '📢';
   };
 
   return (
@@ -77,6 +135,11 @@ function App() {
               <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '10px', padding: '15px', marginBottom: '20px' }}>
                 <p style={{ margin: 0, color: '#991B1B', fontWeight: 'bold', fontSize: '14px' }}>🔒 You are completely anonymous</p>
                 <p style={{ margin: '5px 0 0 0', color: '#B91C1C', fontSize: '12px' }}>No name, phone number, or device ID is stored. Only your state is shared with responders.</p>
+              </div>
+
+              <div style={{ backgroundColor: '#FEF3C7', border: '1px solid #F59E0B', borderRadius: '10px', padding: '12px', marginBottom: '20px' }}>
+                <p style={{ margin: 0, color: '#92400E', fontWeight: 'bold', fontSize: '13px' }}>⚠️ How alerts work</p>
+                <p style={{ margin: '5px 0 0 0', color: '#B45309', fontSize: '12px' }}>Your alert needs to be confirmed by at least 2 people in your area before responders are notified. This prevents false alerts.</p>
               </div>
 
               <h3 style={{ color: '#1F2937', marginBottom: '10px' }}>Select Emergency Type:</h3>
@@ -109,11 +172,53 @@ function App() {
               </button>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-              <div style={{ fontSize: '60px', marginBottom: '20px' }}>✅</div>
-              <h2 style={{ color: '#0F6E56' }}>Alert Sent Successfully</h2>
-              <p style={{ color: '#6B7280' }}>Your anonymous alert has been dispatched to the nearest responders in {selectedState}. Stay safe.</p>
-              <button onClick={resetForm} style={{ marginTop: '20px', padding: '12px 24px', backgroundColor: '#0F6E56', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', cursor: 'pointer' }}>Send Another Alert</button>
+            <div>
+              <div style={{ textAlign: 'center', padding: '20px', backgroundColor: '#F0FDF4', borderRadius: '10px', marginBottom: '20px', border: '1px solid #86EFAC' }}>
+                <div style={{ fontSize: '40px', marginBottom: '10px' }}>✅</div>
+                <h2 style={{ color: '#0F6E56', margin: '0 0 10px 0' }}>Alert Sent Successfully</h2>
+                <p style={{ color: '#6B7280', fontSize: '13px', margin: 0 }}>Your anonymous alert has been received. It needs confirmation from others in your area before responders are notified.</p>
+              </div>
+
+              {alertId && (
+                <div style={{ backgroundColor: '#FEF3C7', border: '1px solid #F59E0B', borderRadius: '10px', padding: '15px', marginBottom: '20px' }}>
+                  <p style={{ margin: '0 0 10px 0', color: '#92400E', fontWeight: 'bold', fontSize: '14px' }}>⚠️ Confirmation needed</p>
+                  <p style={{ margin: '0 0 10px 0', color: '#B45309', fontSize: '13px' }}>Confirmations: {confirmations}/2 {confirmed ? '✅ CONFIRMED — Responders notified!' : ''}</p>
+                  {!confirmed && (
+                    <button onClick={() => handleConfirm(alertId)} style={{ width: '100%', padding: '10px', backgroundColor: '#F59E0B', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>
+                      👍 I also confirm this alert is real
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {recentAlerts.length > 0 && (
+                <div style={{ marginBottom: '20px' }}>
+                  <h3 style={{ color: '#1F2937', marginBottom: '10px' }}>Other alerts in your area:</h3>
+                  {recentAlerts.filter(a => a.id !== alertId).map(alert => (
+                    <div key={alert.id} style={{ backgroundColor: getAlertColor(alert.type), border: '1px solid #E5E7EB', borderRadius: '10px', padding: '12px', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <span style={{ fontWeight: 'bold', fontSize: '13px' }}>{getAlertIcon(alert.type)} {alert.type.toUpperCase()} Alert</span>
+                        <span style={{ fontSize: '11px', color: '#6B7280' }}>{alert.confirmations || 0}/2 confirmations</span>
+                      </div>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#374151' }}>{alert.message || 'Anonymous alert received.'}</p>
+                      {!alert.confirmed && (
+                        <button onClick={() => handleConfirm(alert.id)} style={{ width: '100%', padding: '8px', backgroundColor: '#F59E0B', color: 'white', border: 'none', borderRadius: '8px', fontSize: '12px', cursor: 'pointer' }}>
+                          👍 Confirm this alert is real
+                        </button>
+                      )}
+                      {alert.confirmed && (
+                        <div style={{ backgroundColor: '#D1FAE5', padding: '6px 10px', borderRadius: '6px', fontSize: '12px', color: '#065F46', fontWeight: 'bold' }}>
+                          ✅ Confirmed — Responders have been notified
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button onClick={resetForm} style={{ width: '100%', padding: '12px', backgroundColor: '#0F6E56', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', cursor: 'pointer' }}>
+                Send Another Alert
+              </button>
             </div>
           )}
         </div>
@@ -122,13 +227,6 @@ function App() {
       {view === 'responder' && (
         <ResponderDashboard />
       )}
-        <div style={{ textAlign: 'center', padding: '40px 20px', backgroundColor: '#F9FAFB', borderRadius: '10px' }}>
-          <div style={{ fontSize: '50px', marginBottom: '15px' }}>🚔</div>
-          <h2 style={{ color: '#1F2937' }}>Responder Dashboard</h2>
-          <p style={{ color: '#6B7280' }}>This section is for verified responders — police, hospitals, fire service, and community agents across all 36 states and FCT.</p>
-          <p style={{ color: '#6B7280', fontSize: '13px' }}>Responders receive real-time push notifications and SMS alerts when a citizen sends an alert in their zone.</p>
-        </div>
-  
 
       <div style={{ marginTop: '30px', padding: '10px', backgroundColor: '#F3F4F6', borderRadius: '8px', textAlign: 'center' }}>
         <p style={{ margin: 0, fontSize: '11px', color: '#9CA3AF' }}>🔒 AnonymousMe — Built for Nigeria. No data stored. No identity tracked.</p>
