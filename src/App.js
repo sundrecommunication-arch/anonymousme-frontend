@@ -21,6 +21,15 @@ const ALERT_TYPES = [
 
 const API_URL = 'https://anonymousme-production.up.railway.app';
 
+const getDeviceId = () => {
+  let deviceId = localStorage.getItem('anonymousme_device_id');
+  if (!deviceId) {
+    deviceId = 'device_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    localStorage.setItem('anonymousme_device_id', deviceId);
+  }
+  return deviceId;
+};
+
 function App() {
   const [selectedType, setSelectedType] = useState(null);
   const [message, setMessage] = useState('');
@@ -46,8 +55,12 @@ function App() {
         message: message,
         zone: zone || selectedState,
         state: selectedState,
+        deviceId: getDeviceId(),
       });
       setAlertId(response.data.alertId);
+      const sentAlerts = JSON.parse(localStorage.getItem('sent_alerts') || '[]');
+      sentAlerts.push(response.data.alertId);
+      localStorage.setItem('sent_alerts', JSON.stringify(sentAlerts));
       setSubmitted(true);
       loadRecentAlerts(selectedState);
     } catch (error) {
@@ -57,10 +70,28 @@ function App() {
   };
 
   const handleConfirm = async (id) => {
+    const deviceId = getDeviceId();
+    const confirmedAlerts = JSON.parse(localStorage.getItem('confirmed_alerts') || '[]');
+    const sentAlerts = JSON.parse(localStorage.getItem('sent_alerts') || '[]');
+
+    if (sentAlerts.includes(id)) {
+      alert('You cannot confirm your own alert.');
+      return;
+    }
+
+    if (confirmedAlerts.includes(id)) {
+      alert('You have already confirmed this alert.');
+      return;
+    }
+
     try {
       const response = await axios.post(`${API_URL}/api/alert/confirm`, {
-        alertId: id
+        alertId: id,
+        deviceId: deviceId
       });
+
+      confirmedAlerts.push(id);
+      localStorage.setItem('confirmed_alerts', JSON.stringify(confirmedAlerts));
       setConfirmations(response.data.confirmations);
       setConfirmed(response.data.confirmed);
       loadRecentAlerts(selectedState);
@@ -70,14 +101,12 @@ function App() {
   };
 
   const loadRecentAlerts = async (state) => {
-    
     try {
       const response = await axios.get(`${API_URL}/api/alerts/${state}`);
       setRecentAlerts(response.data);
     } catch (error) {
       console.error('Error loading alerts:', error);
     }
-
   };
 
   const resetForm = () => {
