@@ -70,12 +70,22 @@ function ResponderDashboard() {
     setLoading(false);
   };
 
-  const handleResolve = async (alertId) => {
+ const handleResolve = async (alertId) => {
     try {
       await axios.post(`${API_URL}/api/alert/resolve`, { alertId });
       setAlerts(alerts.filter(a => a.id !== alertId));
     } catch (error) {
       console.error('Error resolving alert:', error);
+    }
+  };
+
+  const handleFalseAlert = async (alertId) => {
+    try {
+      await axios.post(`${API_URL}/api/alert/false`, { alertId });
+      setAlerts(alerts.filter(a => a.id !== alertId));
+      alert('Alert marked as false. Thank you for the feedback.');
+    } catch (error) {
+      console.error('Error marking false alert:', error);
     }
   };
 
@@ -226,10 +236,16 @@ function ResponderDashboard() {
               >
                 ✅ Mark Resolved
               </button>
-              <button
+             <button
                 style={{ flex: 1, padding: '8px', backgroundColor: '#1E3A5F', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}
               >
                 📞 Call for Backup
+              </button>
+              <button
+                onClick={() => handleFalseAlert(alert.id)}
+                style={{ flex: 1, padding: '8px', backgroundColor: '#DC2626', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}
+              >
+                ❌ False Alert
               </button>
             </div>
           </div>
