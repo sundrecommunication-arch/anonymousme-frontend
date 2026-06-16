@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
 import ResponderDashboard from './responderdashboard';
+import NigeriaMap from './NigeriaMap';
 
 const STATES = [
   'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
@@ -165,6 +166,7 @@ function App() {
         <div style={{ display: 'flex', gap: '8px' }}>
           <button onClick={() => setView('citizen')} style={{ padding: '6px 12px', borderRadius: '20px', border: 'none', backgroundColor: view === 'citizen' ? 'white' : 'transparent', color: view === 'citizen' ? '#0F6E56' : 'white', cursor: 'pointer', fontSize: '12px' }}>Citizen</button>
           <button onClick={() => setView('responder')} style={{ padding: '6px 12px', borderRadius: '20px', border: '1px solid white', backgroundColor: view === 'responder' ? 'white' : 'transparent', color: view === 'responder' ? '#0F6E56' : 'white', cursor: 'pointer', fontSize: '12px' }}>Responder</button>
+          <button onClick={() => setView('map')} style={{ padding: '6px 12px', borderRadius: '20px', border: '1px solid white', backgroundColor: view === 'map' ? 'white' : 'transparent', color: view === 'map' ? '#0F6E56' : 'white', cursor: 'pointer', fontSize: '12px' }}>🗺️ Map</button>
         </div>
       </div>
 
@@ -266,6 +268,9 @@ function App() {
 
       {view === 'responder' && (
         <ResponderDashboard />
+      )}
+      {view === 'map' && (
+        <NigeriaMap />
       )}
 
       <div style={{ marginTop: '30px', padding: '10px', backgroundColor: '#F3F4F6', borderRadius: '8px', textAlign: 'center' }}>
