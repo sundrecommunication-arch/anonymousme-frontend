@@ -129,6 +129,14 @@ function ResponderDashboard() {
         <div style={{ backgroundColor: 'white', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '20px' }}>
           <h3 style={{ color: '#1F2937', marginBottom: '15px' }}>Responder Login</h3>
 
+          <label style={{ fontSize: '13px', color: '#6B7280', display: 'block', marginBottom: '5px' }}>Full Name / Unit Name</label>
+          <input
+            value={responderName}
+            onChange={e => setResponderName(e.target.value)}
+            placeholder='e.g. Officer Bello / Lagos State Fire Service'
+            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', marginBottom: '15px', fontSize: '14px', boxSizing: 'border-box' }}
+          />
+
           <label style={{ fontSize: '13px', color: '#6B7280', display: 'block', marginBottom: '5px' }}>Phone Number</label>
           <input
             value={responderPhone}
