@@ -63,6 +63,30 @@ function ResponderDashboard() {
         return;
       }
 
+      const serviceFormats = {
+        'police': /^NPF\/\d{6,}$/,
+        'hospital': /^MDCN\/\d{6,}$/,
+        'ambulance': /^MDCN\/\d{6,}$/,
+        'fire-service': /^LASG\/FS\/\d{3,}$/,
+        'lasema': /^LASEMA\/\d{4,}$/,
+        'volunteer': /^NIN\/\d{11}$/,
+      };
+
+      const format = serviceFormats[responderType];
+      if (format && !format.test(serviceNumber)) {
+        const examples = {
+          'police': 'NPF/123456',
+          'hospital': 'MDCN/123456',
+          'ambulance': 'MDCN/123456',
+          'fire-service': 'LASG/FS/123',
+          'lasema': 'LASEMA/1234',
+          'volunteer': 'NIN/12345678901',
+        };
+        alert(`Invalid service number format for your responder type. Example: ${examples[responderType]}`);
+        setLoading(false);
+        return;
+      }
+
       await axios.post(`${API_URL}/api/responder/register`, {
         name: responderName,
         type: responderType,
