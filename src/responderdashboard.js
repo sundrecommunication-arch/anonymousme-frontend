@@ -226,7 +226,7 @@ function ResponderDashboard() {
                 <span style={{ fontSize: '20px' }}>{getAlertIcon(alert.type)}</span>
                 <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#1F2937', textTransform: 'uppercase' }}>{alert.type} Alert</span>
               </div>
-              <span style={{ fontSize: '11px', color: '#6B7280' }}>{alert.zone || alert.state}</span>
+              <span style={{ fontSize: '11px', color: '#6B7280' }}>{alert.lga || alert.zone || alert.state}</span>
             </div>
             {alert.evidence_url && (
                 <div style={{ marginBottom: '10px' }}>
