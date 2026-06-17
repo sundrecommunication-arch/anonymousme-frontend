@@ -26,6 +26,7 @@ function ResponderDashboard() {
   const [responderName, setResponderName] = useState('');
   const [responderState, setResponderState] = useState('');
   const [responderPhone, setResponderPhone] = useState('');
+  const [serviceNumber, setServiceNumber] = useState('');
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -56,12 +57,18 @@ function ResponderDashboard() {
     setLoading(true);
     try {
       const fcmToken = await requestNotificationPermission();
+      if (!serviceNumber) {
+        alert('Please enter your service number to verify your identity.');
+        setLoading(false);
+        return;
+      }
+
       await axios.post(`${API_URL}/api/responder/register`, {
         name: responderName,
         type: responderType,
         zone: responderState,
         phone: responderPhone,
-        fcmToken: fcmToken,
+        serviceNumber: serviceNumber,
       });
       setIsLoggedIn(true);
     } catch (error) {
@@ -122,13 +129,24 @@ function ResponderDashboard() {
         <div style={{ backgroundColor: 'white', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '20px' }}>
           <h3 style={{ color: '#1F2937', marginBottom: '15px' }}>Responder Login</h3>
 
-          <label style={{ fontSize: '13px', color: '#6B7280', display: 'block', marginBottom: '5px' }}>Full Name / Unit Name</label>
+          <label style={{ fontSize: '13px', color: '#6B7280', display: 'block', marginBottom: '5px' }}>Phone Number</label>
           <input
-            value={responderName}
-            onChange={e => setResponderName(e.target.value)}
-            placeholder='e.g. Officer Bello / Lagos State Fire Service'
+            value={responderPhone}
+            onChange={e => setResponderPhone(e.target.value)}
+            placeholder='e.g. 08012345678'
             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', marginBottom: '15px', fontSize: '14px', boxSizing: 'border-box' }}
           />
+
+          <label style={{ fontSize: '13px', color: '#6B7280', display: 'block', marginBottom: '5px' }}>Service Number / ID</label>
+          <input
+            value={serviceNumber}
+            onChange={e => setServiceNumber(e.target.value)}
+            placeholder='e.g. NPF/123456 or MDCN/123456 or NIN/12345678901'
+            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', marginBottom: '5px', fontSize: '14px', boxSizing: 'border-box' }}
+          />
+          <div style={{ fontSize: '11px', color: '#6B7280', marginBottom: '20px' }}>
+            Police: NPF/xxxxxx · Doctor: MDCN/xxxxxx · Fire: LASG/FS/xxxxx · LASEMA: LASEMA/xxxxx · Volunteer: NIN/xxxxxxxxxxx
+          </div>
 
           <label style={{ fontSize: '13px', color: '#6B7280', display: 'block', marginBottom: '5px' }}>Responder Type</label>
           <select
