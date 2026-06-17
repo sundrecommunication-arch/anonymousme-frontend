@@ -222,9 +222,7 @@ function App() {
                   <option key={state} value={state}>{state}</option>
                 ))}
               </select>
-
-              <h3 style={{ color: '#1F2937', marginBottom: '10px' }}>Describe the situation (optional):</h3>
-              <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder='Briefly describe what is happening...' style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', marginBottom: '15px', fontSize: '14px', height: '100px', boxSizing: 'border-box' }} />
+              
 
               <h3 style={{ color: '#1F2937', marginBottom: '10px' }}>Upload Evidence (optional):</h3>
               <div style={{ border: '2px dashed #E5E7EB', borderRadius: '8px', padding: '15px', marginBottom: '20px', textAlign: 'center' }}>
