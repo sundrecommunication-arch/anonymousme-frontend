@@ -69,6 +69,7 @@ function ResponderDashboard() {
         zone: responderState,
         phone: responderPhone,
         serviceNumber: serviceNumber,
+        fcmToken: fcmToken,
       });
       setIsLoggedIn(true);
     } catch (error) {
