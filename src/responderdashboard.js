@@ -228,7 +228,19 @@ function ResponderDashboard() {
               </div>
               <span style={{ fontSize: '11px', color: '#6B7280' }}>{alert.zone || alert.state}</span>
             </div>
-            <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#374151' }}>{alert.message || 'Anonymous alert received. Please respond immediately.'}</p>
+            {alert.evidence_url && (
+                <div style={{ marginBottom: '10px' }}>
+                  <a href={alert.evidence_url} target='_blank' rel='noopener noreferrer' style={{ display: 'block', marginBottom: '5px' }}>
+                    {alert.evidence_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                      <img src={alert.evidence_url} alt='Evidence' style={{ width: '100%', borderRadius: '8px', maxHeight: '200px', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ backgroundColor: '#1E3A5F', color: 'white', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', textAlign: 'center' }}>
+                        📹 View Video Evidence
+                      </div>
+                    )}
+                  </a>
+                </div>
+              )}
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 onClick={() => handleResolve(alert.id)}
