@@ -31,6 +31,7 @@ function ResponderDashboard() {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [sessionTimer, setSessionTimer] = useState(null);
 
   const fetchAlerts = useCallback(async () => {
     try {
@@ -49,6 +50,24 @@ function ResponderDashboard() {
       return () => clearInterval(interval);
     }
   }, [isLoggedIn, responderState, fetchAlerts]);
+  useEffect(() => {
+    if (isLoggedIn) {
+      const timer = setTimeout(() => {
+        alert('Your session has expired due to inactivity. Please log in again.');
+        setIsLoggedIn(false);
+        setResponderName('');
+        setResponderType('');
+        setResponderState('');
+        setResponderPhone('');
+        setServiceNumber('');
+        setAlerts([]);
+      }, 1800000);
+
+      setSessionTimer(timer);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isLoggedIn]);
 
   const handleLogin = async () => {
     if (!responderType || !responderName || !responderState || !responderPhone) {
