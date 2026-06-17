@@ -32,6 +32,8 @@ function ResponderDashboard() {
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [sessionTimer, setSessionTimer] = useState(null);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+const [loginBlocked, setLoginBlocked] = useState(false);
 
   const fetchAlerts = useCallback(async () => {
     try {
@@ -70,6 +72,11 @@ function ResponderDashboard() {
   }, [isLoggedIn]);
 
   const handleLogin = async () => {
+    if (loginBlocked) {
+      alert('Too many failed login attempts. Please wait 1 hour before trying again.');
+      return;
+    }
+
     if (!responderType || !responderName || !responderState || !responderPhone) {
       alert('Please fill in all fields');
       return;
@@ -117,7 +124,18 @@ function ResponderDashboard() {
       });
       setIsLoggedIn(true);
     } catch (error) {
-      setIsLoggedIn(true);
+      const newAttempts = loginAttempts + 1;
+      setLoginAttempts(newAttempts);
+      if (newAttempts >= 5) {
+        setLoginBlocked(true);
+        alert('Too many failed attempts. Your account is locked for 1 hour.');
+        setTimeout(() => {
+          setLoginBlocked(false);
+          setLoginAttempts(0);
+        }, 3600000);
+      } else {
+        alert(`Login failed. ${5 - newAttempts} attempts remaining.`);
+      }
     }
     setLoading(false);
   };
