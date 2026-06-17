@@ -3,6 +3,13 @@ import axios from 'axios';
 import './App.css';
 import ResponderDashboard from './responderdashboard';
 import NigeriaMap from './NigeriaMap';
+import nigeriaLGAs from './nigeriaLGAs';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseClient = createClient(
+  'https://aalmhlcoakletcfdsjnz.supabase.co',
+  'sb_publishable_Gq0a3bw1l_XDzq853I8WMg_o1wAPpUY'
+);
 
 const STATES = [
   'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue',
@@ -35,7 +42,7 @@ function App() {
   const [selectedType, setSelectedType] = useState(null);
   const [message, setMessage] = useState('');
   const [selectedState, setSelectedState] = useState('');
-  const [zone, setZone] = useState('');
+  const [selectedLGA, setSelectedLGA] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [alertId, setAlertId] = useState(null);
@@ -46,8 +53,8 @@ function App() {
   const [evidenceFile, setEvidenceFile] = useState(null);
 
   const handleSubmit = async () => {
-    if (!selectedType || !selectedState) {
-      alert('Please select an alert type and your state');
+    if (!selectedType || !selectedState || !selectedLGA) {
+      alert('Please select an alert type, your state and your LGA');
       return;
     }
 
@@ -63,6 +70,7 @@ function App() {
     recentAlertTimes.push(now);
     localStorage.setItem('alert_times', JSON.stringify(recentAlertTimes));
     setLoading(true);
+
     try {
       let evidenceUrl = null;
 
@@ -70,13 +78,8 @@ function App() {
         try {
           const fileExt = evidenceFile.name.split('.').pop();
           const fileName = `${Date.now()}.${fileExt}`;
-          const { createClient } = await import('@supabase/supabase-js');
-          const supabase = createClient(
-            'https://aalmhlcoakletcfdsjnz.supabase.co',
-            'sb_publishable_Gq0a3bw1l_XDzq853I8WMg_o1wAPpUY'
-          );
           console.log('Uploading file:', fileName);
-          const { data: uploadData, error: uploadError } = await supabase.storage
+          const { data: uploadData, error: uploadError } = await supabaseClient.storage
             .from('Evidence')
             .upload(fileName, evidenceFile);
           console.log('Upload result:', uploadData, uploadError);
@@ -84,7 +87,7 @@ function App() {
             console.error('Upload error:', uploadError);
           }
           if (uploadData) {
-           evidenceUrl = `https://aalmhlcoakletcfdsjnz.supabase.co/storage/v1/object/public/Evidence/${fileName}`;
+            evidenceUrl = `https://aalmhlcoakletcfdsjnz.supabase.co/storage/v1/object/public/Evidence/${fileName}`;
             console.log('Evidence URL:', evidenceUrl);
           }
         } catch (uploadErr) {
@@ -95,11 +98,13 @@ function App() {
       const response = await axios.post(`${API_URL}/api/alert`, {
         type: selectedType,
         message: message,
-        zone: zone || selectedState,
+        zone: selectedLGA || selectedState,
         state: selectedState,
+        lga: selectedLGA,
         deviceId: getDeviceId(),
         evidenceUrl: evidenceUrl,
       });
+
       setAlertId(response.data.alertId);
       const sentAlerts = JSON.parse(localStorage.getItem('sent_alerts') || '[]');
       sentAlerts.push(response.data.alertId);
@@ -156,12 +161,13 @@ function App() {
     setSelectedType(null);
     setMessage('');
     setSelectedState('');
-    setZone('');
+    setSelectedLGA('');
     setSubmitted(false);
     setAlertId(null);
     setConfirmations(0);
     setConfirmed(false);
     setRecentAlerts([]);
+    setEvidenceFile(null);
   };
 
   const getAlertColor = (type) => {
@@ -206,7 +212,7 @@ function App() {
             <div>
               <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '10px', padding: '15px', marginBottom: '20px' }}>
                 <p style={{ margin: 0, color: '#991B1B', fontWeight: 'bold', fontSize: '14px' }}>🔒 You are completely anonymous</p>
-                <p style={{ margin: '5px 0 0 0', color: '#B91C1C', fontSize: '12px' }}>No name, phone number, or device ID is stored. Only your state is shared with responders.</p>
+                <p style={{ margin: '5px 0 0 0', color: '#B91C1C', fontSize: '12px' }}>No name, phone number, or device ID is stored. Only your state and LGA are shared with responders.</p>
               </div>
 
               <div style={{ backgroundColor: '#FEF3C7', border: '1px solid #F59E0B', borderRadius: '10px', padding: '12px', marginBottom: '20px' }}>
@@ -226,16 +232,23 @@ function App() {
               </div>
 
               <h3 style={{ color: '#1F2937', marginBottom: '10px' }}>Select Your State:</h3>
-              <select value={selectedState} onChange={e => setSelectedState(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', marginBottom: '15px', fontSize: '14px' }}>
+              <select value={selectedState} onChange={e => { setSelectedState(e.target.value); setSelectedLGA(''); }} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', marginBottom: '15px', fontSize: '14px' }}>
                 <option value=''>-- Select State --</option>
                 {STATES.map(state => (
                   <option key={state} value={state}>{state}</option>
                 ))}
               </select>
-              
+
+              <h3 style={{ color: '#1F2937', marginBottom: '10px' }}>Select Your LGA (required):</h3>
+              <select value={selectedLGA} onChange={e => setSelectedLGA(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', marginBottom: '15px', fontSize: '14px' }}>
+                <option value=''>-- Select Local Government Area --</option>
+                {selectedState && nigeriaLGAs[selectedState] && nigeriaLGAs[selectedState].map(lga => (
+                  <option key={lga} value={lga}>{lga}</option>
+                ))}
+              </select>
 
               <h3 style={{ color: '#1F2937', marginBottom: '10px' }}>Upload Evidence (optional):</h3>
-              <div style={{ border: '2px dashed #E5E7EB', borderRadius: '8px', padding: '15px', marginBottom: '20px', textAlign: 'center' }}>
+              <div style={{ border: '2px dashed #E5E7EB', borderRadius: '8px', padding: '15px', marginBottom: '15px', textAlign: 'center' }}>
                 <input type='file' accept='image/*,video/*' onChange={e => setEvidenceFile(e.target.files[0])} style={{ display: 'none' }} id='evidence-upload' />
                 <label htmlFor='evidence-upload' style={{ cursor: 'pointer' }}>
                   <div style={{ fontSize: '24px', marginBottom: '5px' }}>📎</div>
