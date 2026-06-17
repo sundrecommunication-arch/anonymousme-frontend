@@ -28,6 +28,9 @@ const ALERT_TYPES = [
 ];
 
 const API_URL = 'https://anonymousme-production.up.railway.app';
+const API_KEY = 'dr3@hP3hy5M_$1_s!_dr0L_3hT';
+
+axios.defaults.headers.common['x-api-key'] = API_KEY;
 
 const getDeviceId = () => {
   let deviceId = localStorage.getItem('anonymousme_device_id');

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { requestNotificationPermission } from './firebase';
 
 const API_URL = 'https://anonymousme-production.up.railway.app';
+axios.defaults.headers.common['x-api-key'] = 'dr3@hP3hy5M_$1_s!_dr0L_3hT';
 
 const RESPONDER_TYPES = [
   { id: 'police', label: 'Police / NPF', icon: '🚔' },
