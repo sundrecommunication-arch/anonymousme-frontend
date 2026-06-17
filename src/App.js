@@ -84,7 +84,7 @@ function App() {
             console.error('Upload error:', uploadError);
           }
           if (uploadData) {
-            evidenceUrl = `https://aalmhlcoakletcfdsjnz.supabase.co/storage/v1/object/public/evidence/${fileName}`;
+           evidenceUrl = `https://aalmhlcoakletcfdsjnz.supabase.co/storage/v1/object/public/Evidence/${fileName}`;
             console.log('Evidence URL:', evidenceUrl);
           }
         } catch (uploadErr) {
