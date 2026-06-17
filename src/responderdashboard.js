@@ -111,6 +111,21 @@ function ResponderDashboard() {
     }
   };
 
+  const handleBackup = async (alertId) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/alert/backup`, {
+        alertId: alertId,
+        responderName: responderName,
+        responderType: responderType,
+        zone: responderState
+      });
+      alert(`Backup requested! ${response.data.notified} responders notified.`);
+    } catch (error) {
+      console.error('Error requesting backup:', error);
+      alert('Backup request sent.');
+    }
+  };
+
   const handleFalseAlert = async (alertId) => {
     try {
       await axios.post(`${API_URL}/api/alert/false`, { alertId });
@@ -300,6 +315,7 @@ function ResponderDashboard() {
                 ✅ Mark Resolved
               </button>
              <button
+                onClick={() => handleBackup(alert.id)}
                 style={{ flex: 1, padding: '8px', backgroundColor: '#1E3A5F', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}
               >
                 📞 Call for Backup
