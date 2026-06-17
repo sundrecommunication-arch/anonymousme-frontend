@@ -55,7 +55,7 @@ function App() {
     const alertTimes = JSON.parse(localStorage.getItem('alert_times') || '[]');
     const recentAlertTimes = alertTimes.filter(time => now - time < 3600000);
 
-    if (recentAlertTimes.length >= 3) {
+    if (recentAlertTimes.length >= 20) {
       alert('You have sent too many alerts in the last hour. Please wait before sending another.');
       return;
     }
