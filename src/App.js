@@ -67,18 +67,28 @@ function App() {
       let evidenceUrl = null;
 
       if (evidenceFile) {
-        const fileExt = evidenceFile.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabase = createClient(
-          'https://aalmhlcoakletcfdsjnz.supabase.co',
-          'sb_publishable_Gq0a3bw1l_XDzq853I8WMg_o1wAPpUY'
-        );
-        const { data: uploadData } = await supabase.storage
-          .from('evidence')
-          .upload(fileName, evidenceFile);
-        if (uploadData) {
-          evidenceUrl = `https://aalmhlcoakletcfdsjnz.supabase.co/storage/v1/object/public/evidence/${fileName}`;
+        try {
+          const fileExt = evidenceFile.name.split('.').pop();
+          const fileName = `${Date.now()}.${fileExt}`;
+          const { createClient } = await import('@supabase/supabase-js');
+          const supabase = createClient(
+            'https://aalmhlcoakletcfdsjnz.supabase.co',
+            'sb_publishable_Gq0a3bw1l_XDzq853I8WMg_o1wAPpUY'
+          );
+          console.log('Uploading file:', fileName);
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('evidence')
+            .upload(fileName, evidenceFile);
+          console.log('Upload result:', uploadData, uploadError);
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+          }
+          if (uploadData) {
+            evidenceUrl = `https://aalmhlcoakletcfdsjnz.supabase.co/storage/v1/object/public/evidence/${fileName}`;
+            console.log('Evidence URL:', evidenceUrl);
+          }
+        } catch (uploadErr) {
+          console.error('Upload exception:', uploadErr);
         }
       }
 
