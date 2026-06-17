@@ -77,7 +77,7 @@ function App() {
           );
           console.log('Uploading file:', fileName);
           const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('evidence')
+            .from('Evidence')
             .upload(fileName, evidenceFile);
           console.log('Upload result:', uploadData, uploadError);
           if (uploadError) {
