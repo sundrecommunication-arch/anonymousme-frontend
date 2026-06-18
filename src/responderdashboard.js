@@ -142,7 +142,11 @@ const [loginBlocked, setLoginBlocked] = useState(false);
 
  const handleResolve = async (alertId) => {
     try {
-      await axios.post(`${API_URL}/api/alert/resolve`, { alertId });
+      await axios.post(`${API_URL}/api/alert/resolve`, { 
+        alertId,
+        responderName,
+        responderType
+      });
       setAlerts(alerts.filter(a => a.id !== alertId));
     } catch (error) {
       console.error('Error resolving alert:', error);
@@ -164,9 +168,13 @@ const [loginBlocked, setLoginBlocked] = useState(false);
     }
   };
 
-  const handleFalseAlert = async (alertId) => {
+const handleFalseAlert = async (alertId) => {
     try {
-      await axios.post(`${API_URL}/api/alert/false`, { alertId });
+      await axios.post(`${API_URL}/api/alert/false`, { 
+        alertId,
+        responderName,
+        responderType
+      });
       setAlerts(alerts.filter(a => a.id !== alertId));
       alert('Alert marked as false. Thank you for the feedback.');
     } catch (error) {
