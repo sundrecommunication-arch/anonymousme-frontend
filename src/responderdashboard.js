@@ -31,7 +31,7 @@ function ResponderDashboard() {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [sessionTimer, setSessionTimer] = useState(null);
+  const [, setSessionTimer] = useState(null);
   const [loginAttempts, setLoginAttempts] = useState(0);
 const [loginBlocked, setLoginBlocked] = useState(false);
 
