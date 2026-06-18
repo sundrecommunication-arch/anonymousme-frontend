@@ -114,7 +114,7 @@ const [loginBlocked, setLoginBlocked] = useState(false);
         return;
       }
 
-      await axios.post(`${API_URL}/api/responder/register`, {
+      const response = await axios.post(`${API_URL}/api/responder/login`, {
         name: responderName,
         type: responderType,
         zone: responderState,
@@ -122,7 +122,11 @@ const [loginBlocked, setLoginBlocked] = useState(false);
         serviceNumber: serviceNumber,
         fcmToken: fcmToken,
       });
+
+      localStorage.setItem('responder_token', response.data.token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
       setIsLoggedIn(true);
+
     } catch (error) {
       const newAttempts = loginAttempts + 1;
       setLoginAttempts(newAttempts);
